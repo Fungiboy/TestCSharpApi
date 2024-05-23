@@ -1,5 +1,6 @@
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace WebApp;
 public class UtilsTest
@@ -51,6 +52,7 @@ public class UtilsTest
         output.WriteLine("The test passed!");
     }
 
+
     [Fact]
     public void TestRemoveMockUsers()
 {
@@ -72,4 +74,65 @@ public class UtilsTest
     Assert.Equivalent(mockUsersInDb, result);
     Console.WriteLine("The test passed!");
 }
+
+ //Metod 2
+    [Theory]
+    [InlineData("shit happens", "****", "**** happens")]
+    [InlineData("angel ass", "****", "angel ****")]
+
+    public void TestRemoveBadWords(string badStrings, string censored, string cleanStrings)
+    {
+        Assert.Equal(cleanStrings, Utils.RemoveBadWords(badStrings, censored));
+    }
+
+[Theory]
+    [InlineData("abC9#fgh", true)]  // ok
+    [InlineData("stU5/xyz", true)]  // ok too
+    [InlineData("abC9#fg", false)]  // too short
+    [InlineData("abCd#fgh", false)] // no digit
+    [InlineData("abc9#fgh", false)] // no capital letter
+    [InlineData("abC9efgh", false)] // no special character
+    public void TestIsPasswordGoodEnough(string password, bool expected)
+    {
+        Assert.Equal(expected, Utils.IsPasswordGoodEnough(password));
+    }
+
+    [Theory]
+    [InlineData("abC9#fgh", true)]  // ok
+    [InlineData("stU5/xyz", true)]  // ok too
+    [InlineData("abC9#fg", false)]  // too short
+    [InlineData("abCd#fgh", false)] // no digit
+    [InlineData("abc9#fgh", false)] // no capital letter
+    [InlineData("abC9efgh", false)] // no special character
+    public void TestIsPasswordGoodEnoughRegexVersion(string password, bool expected)
+    {
+        Assert.Equal(expected, Utils.IsPasswordGoodEnoughRegexVersion(password));
+    }
+
+
+    
+    [Fact]
+    public void TestCountDomainsFromUserEmails()
+    {
+        Arr users = SQLQuery("SELECT email FROM users");
+        Obj domainsindb = Obj();
+        foreach(var user in users)
+        {
+            string domain = user.email.Split("@")[1];
+            if(!domainsindb.HasKey(domain))
+            {
+                domainsindb[domain] = 1;
+            }
+            else
+            {
+                domainsindb[domain]++;
+            }
+        }
+        Assert.Equivalent(domainsindb, Utils.CountDomainsFromUserEmails());
+
+        Console.WriteLine("All test correct");
+    }
+    
+            
 }
+

@@ -11,5 +11,8 @@ Globals = Obj(new
     sessionLifeTimeHours = 2
 });
 
-Server.Start();
-//Log(WebApp.Utils.CountDomainsFromUserEmails());
+//Server.Start();
+Log(WebApp.Utils.CountDomainsFromUserEmails());
+//Log(WebApp.Utils.CreateMockUsers());
+//Log(WebApp.Utils.RemoveMockUsers());
+

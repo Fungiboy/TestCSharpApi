@@ -1,4 +1,5 @@
 namespace WebApp;
+
 public static class Utils
 {
     private static readonly Arr mockUsers = JSON.Parse(File.ReadAllText(FilePath("json", "mock-users.json")));
@@ -65,13 +66,40 @@ public static class Utils
 
     public static Obj CountDomainsFromUserEmails()
     {
-        Utils.CreateMockUsers();
-        var qry = SQLQuery("SELECT * FROM EmailCounter ORDER BY counter desc");
-        var result = Obj();
-        qry.ForEach(row => result[row.domain] = row.counter);
-        Utils.RemoveMockUsers();
-        Log("Domain results: ", result);
-        return result;
+        Arr queryDomains = SQLQuery("SELECT SUBSTRING(email, instr(email, '@') + 1, length(email)) AS domain, count(id) AS count FROM users GROUP BY domain");
+        Obj countedDomains = Obj();
+        foreach(var domain in queryDomains)
+        {
+            countedDomains[domain.domain] = domain.count;
+        }
+        return countedDomains;
+    }
+
+    public static string RemoveBadWords(string badStrings, string censored)
+        {
+        var badWordsFromFile = File.ReadAllText(Path.Combine("json", "bad-words.json"));
+        Arr badWords = JSON.Parse(badWordsFromFile);
+
+        string cleanStrings = Regex.Replace(badStrings, "\\b" + string.Join("\\b|\\b", badWords) + "\\b", censored, RegexOptions
+        .IgnoreCase);
+
+        return cleanStrings;
+        }
+
+ public static bool IsPasswordGoodEnough(string password)
+    {
+        return password.Length >= 8
+            && password.Any(Char.IsDigit)
+            && password.Any(Char.IsLower)
+            && password.Any(Char.IsUpper)
+            && password.Any(x => !Char.IsLetterOrDigit(x));
+    }
+
+    public static bool IsPasswordGoodEnoughRegexVersion(string password)
+    {
+        // See: https://dev.to/rasaf_ibrahim/write-regex-password-validation-like-a-pro-5175
+        var pattern = @"^(?=.*[0-9])(?=.*[a-zåäö])(?=.*[A-ZÅÄÖ])(?=.*\W).{8,}$";
+        return Regex.IsMatch(password, pattern);
     }
 }
 
