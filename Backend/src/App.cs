@@ -12,3 +12,4 @@ Globals = Obj(new
 });
 
 Server.Start();
+//Log(WebApp.Utils.CountDomainsFromUserEmails());

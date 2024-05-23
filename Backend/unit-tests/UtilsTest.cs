@@ -4,6 +4,7 @@ using Xunit.Abstractions;
 namespace WebApp;
 public class UtilsTest
 {
+    private static readonly Arr mockUsers = JSON.Parse(File.ReadAllText(FilePath("json", "mock-users.json")));
     // The following lines are needed to get 
     // output to the Console to work in xUnit tests!
     // (also needs the using Xunit.Abstractions)
@@ -49,4 +50,26 @@ public class UtilsTest
         Assert.Equivalent(mockUsersNotInDb, result);
         output.WriteLine("The test passed!");
     }
+
+    [Fact]
+    public void TestRemoveMockUsers()
+{
+    // Hämta alla användare från databasen efter att mock-användarna har lagts till
+    Arr usersInDbBeforeRemoval = SQLQuery("SELECT email FROM users");
+    Arr emailsInDbBeforeRemoval = usersInDbBeforeRemoval.Map(user => user.email);
+
+    // Filtrera ut de mock-användare som faktiskt finns i databasen
+    Arr mockUsersInDb = mockUsers.Filter(
+        mockUser => emailsInDbBeforeRemoval.Contains(mockUser.email)
+    );
+
+    // Kör metoden för att ta bort mock-användarna
+    var result = Utils.RemoveMockUsers();
+
+    // Kontrollera att antalet borttagna mock-användare är korrekt
+    Console.WriteLine($"The test expected that {mockUsersInDb.Length} users should be removed.");
+    Console.WriteLine($"And {result.Length} users were removed.");
+    Assert.Equivalent(mockUsersInDb, result);
+    Console.WriteLine("The test passed!");
+}
 }
